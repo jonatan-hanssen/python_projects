@@ -89,6 +89,8 @@ class Array:
         pass
 
     def __getitem__(self, key):
+        # this works even on multidimensional arrays because lists also implement this
+        # function so it just gets called recursively
         return self.data[key]
 
     def __add__(self, other):
@@ -104,11 +106,31 @@ class Array:
             Array: the sum as a new array.
 
         """
+        if self.type == "bool":
+            return NotImplemented
+        if isinstance(other,Array):
+            if other.type == "bool":
+                return NotImplemented
+            if other.shape != self.shape:
+                raise TypeError("Shape mismatch between arrays")
+            new_values = [self.flattened[i] + other.flattened[i] for i in range(len(self.flattened))]
 
-        # check that the method supports the given arguments (check for data type and shape of array)
-        # if the array is a boolean you should return NotImplemented
+        elif isinstance(other,int) or isinstance(other,float):
+            new_values = [self.flattened[i] + other for i in range(len(self.flattened))]
 
-        pass
+        else:
+            raise TypeError(f"Illegal addition between array and {type(other).__name__}")
+
+        return Array(self.shape, *new_values)
+
+
+        # assuming we have correctly handled any possible errors it is not possible
+        # for array addition to fail at this point (except for overflows maybe) because
+        # arrays can only be integers, floats and bools, and addition between ints and
+        # floats is handled correctly
+
+
+
 
     def __radd__(self, other):
         """Element-wise adds Array with another Array or number.
