@@ -2,9 +2,20 @@
 Array class for assignment 2
 """
 
+# used to easily find the number of elements in the array from the shape
+from functools import reduce
+
 class Array:
 
     def __init__(self, shape, *values):
+
+        self.data = []
+        self.shape = shape
+
+        # why spend time vectorizing the array after creating it? It is already given to us
+        # vectorized.
+        self.flattened = list(values)
+
         """Initialize an array of 1-dimensionality. Elements can only be of type:
 
         - int
@@ -25,6 +36,26 @@ class Array:
             ValueError: If the number of values does not fit with the shape.
         """
 
+
+        try:
+            if not isinstance(shape,tuple):
+                raise TypeError("Shape must be a tuple")
+            if len(shape) == 0:
+                raise TypeError("Shape tuple cannot be empty")
+
+            # calculates the spots in the array by multiplying everything in shape
+            total_values = reduce(lambda x,y: x*y, shape)
+
+            if len(values) != total_values:
+                raise TypeError("Number of values does not line up with shape of array")
+
+            # we make it into a list so we can pop
+            values = list(values)
+            self._fill_list(self.data, shape, values, 0)
+
+        except TypeError as e:
+            print(f"TypeError: {e}")
+
         # Check if the values are of valid types
 
         # Check that the amount of values corresponds to the shape
@@ -41,6 +72,9 @@ class Array:
 
         """
         pass
+
+    def __getitem__(self, key):
+        return self.data[key]
 
     def __add__(self, other):
         """Element-wise adds Array with another Array or number.
@@ -195,3 +229,34 @@ class Array:
         """
 
         pass
+
+    def _fill_list(self, parent, shape, values, index):
+        """Fills a list with lists or values and recursively call this function
+
+        Args:
+            parent (list): the list to append to
+            shape (tuple of ints): a tuple defining the shape of the final array
+            values (tuple of ints, floats, or bools): the values to be added to the final lists
+            index (int): chooses which number from shape we are working with for this iteration
+
+        Returns:
+            Does not return anything, but appends to parent list
+
+        Raises:
+            ValueError: if the shape of self and other are not equal.
+        """
+
+        # that means we are at the innermost list
+        if index == (len(shape) - 1):
+            for i in range(shape[index]):
+                # because we pop, and because we call the recursions in the correct
+                # order this ensures the array is filled as we would expect (row first)
+                # without needing to keep track of which exact row this would be (to figure
+                # out which values we need for this row).
+                parent.append(values.pop(0))
+
+        else:
+            for i in range(shape[index]):
+                inner_list = list()
+                self._fill_list(inner_list,shape,values,index+1)
+                parent.append(inner_list)
