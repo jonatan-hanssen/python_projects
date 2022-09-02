@@ -15,6 +15,7 @@ class Array:
         # why spend time vectorizing the array after creating it? It is already given to us
         # vectorized.
         self.flattened = list(values)
+        self.type = ""
 
         """Initialize an array of 1-dimensionality. Elements can only be of type:
 
@@ -38,10 +39,18 @@ class Array:
 
 
         try:
+            # --------- error checking ---------
+
+            # shape:
             if not isinstance(shape,tuple):
                 raise TypeError("Shape must be a tuple")
             if len(shape) == 0:
                 raise TypeError("Shape tuple cannot be empty")
+            for val in shape:
+                if not isinstance(val,int):
+                    raise TypeError("Values in shape must be integers")
+
+            # values:
 
             # calculates the spots in the array by multiplying everything in shape
             total_values = reduce(lambda x,y: x*y, shape)
@@ -49,12 +58,27 @@ class Array:
             if len(values) != total_values:
                 raise TypeError("Number of values does not line up with shape of array")
 
+            # we must check for bool before int because a bool is a subclass of integers
+            if isinstance(values[0],bool):
+                self.type = "bool"
+            elif isinstance(values[0],int):
+                self.type = "int"
+            elif isinstance(values[0],float):
+                self.type = "float"
+            else:
+                raise TypeError("Values must be integers, floats or booleans")
+
+            for val in values:
+                if type(val).__name__ != self.type:
+                    raise TypeError("Values must be homogeneous")
+
             # we make it into a list so we can pop
             values = list(values)
             self._fill_list(self.data, shape, values, 0)
 
         except TypeError as e:
             print(f"TypeError: {e}")
+
 
         # Check if the values are of valid types
 
