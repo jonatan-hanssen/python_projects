@@ -87,7 +87,9 @@ class Array:
             str: A string representation of the array.
 
         """
-        pass
+        string = self._get_str(self.data)
+        # cleanup here because I didnt do it in the recursion
+        return string.replace(",\n ]","]")
 
     def __getitem__(self, key):
         # this works even on multidimensional arrays because lists also implement this
@@ -377,3 +379,26 @@ class Array:
                 inner_list = list()
                 self._fill_list(inner_list,shape,values,index+1)
                 parent.append(inner_list)
+
+    def _get_str(self, cur_list):
+        """Recursively return a string representation of the array
+
+        Args:
+            cur_list (list or int, float or bool): the list to give string representation of
+
+        Returns:
+            A string representation of the list, comprised of the string representations of the
+            lists within it
+        """
+        string = ""
+
+        if isinstance(cur_list[0],list):
+            string += "["
+            for inner_list in cur_list:
+                string += self._get_str(inner_list) + ",\n "
+            string += "]"
+            return string
+        else:
+            return str(cur_list)
+
+
