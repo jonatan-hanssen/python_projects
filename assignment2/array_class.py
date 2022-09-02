@@ -4,6 +4,7 @@ Array class for assignment 2
 
 # used to easily find the number of elements in the array from the shape
 from functools import reduce
+from statistics import mean
 
 class Array:
 
@@ -93,6 +94,18 @@ class Array:
         # function so it just gets called recursively
         return self.data[key]
 
+    def _operator_precheck(self, other, no_bools):
+        # if this doesnt raise an error we are good
+        if self.type == "bool" and no_bools:
+            raise NotImplementedError
+        if isinstance(other,Array):
+            if other.type == "bool" and no_bools:
+                raise NotImplementedError
+            if other.shape != self.shape:
+                raise TypeError("Shape mismatch between arrays")
+        elif not (isinstance(other,int) or isinstance(other,float)):
+            raise TypeError(f"Illegal operation between Array and {type(other).__name__}")
+
     def __add__(self, other):
         """Element-wise adds Array with another Array or number.
 
@@ -106,20 +119,18 @@ class Array:
             Array: the sum as a new array.
 
         """
-        if self.type == "bool":
+        try:
+            self._operator_precheck(other, True)
+        except TypeError as e:
+            print(f"TypeError: {e}")
+            return None
+        except NotImplementedError:
             return NotImplemented
+
         if isinstance(other,Array):
-            if other.type == "bool":
-                return NotImplemented
-            if other.shape != self.shape:
-                raise TypeError("Shape mismatch between arrays")
             new_values = [self.flattened[i] + other.flattened[i] for i in range(len(self.flattened))]
-
-        elif isinstance(other,int) or isinstance(other,float):
-            new_values = [self.flattened[i] + other for i in range(len(self.flattened))]
-
         else:
-            raise TypeError(f"Illegal addition between array and {type(other).__name__}")
+            new_values = [self.flattened[i] + other for i in range(len(self.flattened))]
 
         return Array(self.shape, *new_values)
 
@@ -145,7 +156,8 @@ class Array:
             Array: the sum as a new array.
 
         """
-        pass
+        # addition is commutative so this is easy
+        return self.__add__(other)
 
     def __sub__(self, other):
         """Element-wise subtracts an Array or number from this Array.
@@ -160,7 +172,20 @@ class Array:
             Array: the difference as a new array.
 
         """
-        pass
+        try:
+            self._operator_precheck(other, True)
+        except TypeError as e:
+            print(f"TypeError: {e}")
+            return None
+        except NotImplementedError:
+            return NotImplemented
+
+        if isinstance(other,Array):
+            new_values = [self.flattened[i] - other.flattened[i] for i in range(len(self.flattened))]
+        else:
+            new_values = [self.flattened[i] - other for i in range(len(self.flattened))]
+
+        return Array(self.shape, *new_values)
 
     def __rsub__(self, other):
         """Element-wise subtracts this Array from a number or Array.
@@ -175,7 +200,22 @@ class Array:
             Array: the difference as a new array.
 
         """
-        pass
+
+        # subtraction is not commutative so we actually have to write it again
+        try:
+            self._operator_precheck(other, True)
+        except TypeError as e:
+            print(f"TypeError: {e}")
+            return None
+        except NotImplementedError:
+            return NotImplemented
+
+        if isinstance(other,Array):
+            new_values = [other.flattened[i] - self.flattened[i] for i in range(len(self.flattened))]
+        else:
+            new_values = [other - self.flattened[i] for i in range(len(self.flattened))]
+
+        return Array(self.shape, *new_values)
 
     def __mul__(self, other):
         """Element-wise multiplies this Array with a number or array.
@@ -190,7 +230,20 @@ class Array:
             Array: a new array with every element multiplied with `other`.
 
         """
-        pass
+        try:
+            self._operator_precheck(other, True)
+        except TypeError as e:
+            print(f"TypeError: {e}")
+            return None
+        except NotImplementedError:
+            return NotImplemented
+
+        if isinstance(other,Array):
+            new_values = [self.flattened[i] * other.flattened[i] for i in range(len(self.flattened))]
+        else:
+            new_values = [self.flattened[i] * other for i in range(len(self.flattened))]
+
+        return Array(self.shape, *new_values)
 
     def __rmul__(self, other):
         """Element-wise multiplies this Array with a number or array.
@@ -221,7 +274,20 @@ class Array:
             bool: True if the two arrays are equal (identical). False otherwise.
 
         """
-        pass
+        try:
+            self._operator_precheck(other, False)
+        except TypeError as e:
+            print(f"TypeError: {e}")
+            return None
+
+        if not isinstance(other,Array):
+            raise TypeError(f"Illegal operation between Array and {type(other).__name__}")
+        for i in range(len(self.flattened)):
+            if not self.flattened[i] == other.flattened[i]:
+                return False
+        return True
+
+
 
     def is_equal(self, other):
         """Compares an Array element-wise with another Array or number.
@@ -241,8 +307,21 @@ class Array:
             ValueError: if the shape of self and other are not equal.
 
         """
+        try:
+            self._operator_precheck(other, False)
+        except TypeError as e:
+            print(f"TypeError: {e}")
+            return None
 
-        pass
+        if isinstance(other,Array):
+            for i in range(len(self.flattened)):
+                if not self.flattened[i] == other.flattened[i]:
+                    return False
+        else:
+            for i in range(len(self.flattened)):
+                if not self.flattened[i] == other:
+                    return False
+        return True
 
     def min_element(self):
         """Returns the smallest value of the array.
@@ -253,6 +332,9 @@ class Array:
             float: The value of the smallest element in the array.
 
         """
+        if self.type == "bool":
+            raise TypeError("Cannot calculate min of boolean array")
+        return min(self.flattened)
 
         pass
 
@@ -264,8 +346,9 @@ class Array:
         Returns:
             float: the mean value
         """
-
-        pass
+        if self.type == "bool":
+            raise TypeError("Cannot calculate mean of boolean array")
+        return mean(self.flattened)
 
     def _fill_list(self, parent, shape, values, index):
         """Fills a list with lists or values and recursively call this function
@@ -278,9 +361,6 @@ class Array:
 
         Returns:
             Does not return anything, but appends to parent list
-
-        Raises:
-            ValueError: if the shape of self and other are not equal.
         """
 
         # that means we are at the innermost list
