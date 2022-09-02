@@ -79,15 +79,6 @@ class Array:
         except TypeError as e:
             print(f"TypeError: {e}")
 
-
-        # Check if the values are of valid types
-
-        # Check that the amount of values corresponds to the shape
-
-        # Set class-variables
-
-        pass
-
     def __str__(self):
         """Returns a nicely printable string representation of the array.
 
