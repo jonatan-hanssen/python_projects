@@ -99,14 +99,32 @@ class Array:
         return self.data[key]
 
     def _operator_precheck(self, other, no_bools):
-        # if this doesnt raise an error we are good
+        """Checks if it is legal to perform an operation between this object and other
+
+        This function is called before every operator function. It raises an error if
+        the operation would be illegal
+
+        Args:
+            other (Array, float, int): The array or number to check validity againts
+            no_bools (boolean): Whether we accept booleans for the array
+
+        Returns:
+            Does not return anything
+
+        Raises:
+            NotImplementedError: If the operation is not implemented. This is only raised
+            so that the calling function can handle it and return NotImplemented
+            TypeError: If other is an illegal type
+            ValueError: If other is an array with mismatched shape
+
+        """
         if self.type == "bool" and no_bools:
             raise NotImplementedError
         if isinstance(other,Array):
             if other.type == "bool" and no_bools:
                 raise NotImplementedError
             if other.shape != self.shape:
-                raise TypeError("Shape mismatch between arrays")
+                raise ValueError("Shape mismatch between arrays")
         elif not (isinstance(other,int) or isinstance(other,float)):
             raise TypeError(f"Illegal operation between Array and {type(other).__name__}")
 
@@ -114,7 +132,7 @@ class Array:
         """Element-wise adds Array with another Array or number.
 
         If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        (specific data type or shape), it returns NotImplemented.
 
         Args:
             other (Array, float, int): The array or number to add element-wise to this array.
@@ -128,6 +146,9 @@ class Array:
         except TypeError as e:
             print(f"TypeError: {e}")
             return None
+        except ValueError as e:
+            print(f"ValueError: {e}")
+            return None
         except NotImplementedError:
             return NotImplemented
 
@@ -139,19 +160,12 @@ class Array:
         return Array(self.shape, *new_values)
 
 
-        # assuming we have correctly handled any possible errors it is not possible
-        # for array addition to fail at this point (except for overflows maybe) because
-        # arrays can only be integers, floats and bools, and addition between ints and
-        # floats is handled correctly
-
-
-
 
     def __radd__(self, other):
         """Element-wise adds Array with another Array or number.
 
         If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        (specific data type or shape), it returns NotImplemented.
 
         Args:
             other (Array, float, int): The array or number to add element-wise to this array.
@@ -167,7 +181,7 @@ class Array:
         """Element-wise subtracts an Array or number from this Array.
 
         If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        (specific data type or shape), it returns NotImplemented.
 
         Args:
             other (Array, float, int): The array or number to subtract element-wise from this array.
@@ -180,6 +194,9 @@ class Array:
             self._operator_precheck(other, True)
         except TypeError as e:
             print(f"TypeError: {e}")
+            return None
+        except ValueError as e:
+            print(f"ValueError: {e}")
             return None
         except NotImplementedError:
             return NotImplemented
@@ -195,7 +212,7 @@ class Array:
         """Element-wise subtracts this Array from a number or Array.
 
         If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        (specific data type or shape), it returns NotImplemented.
 
         Args:
             other (Array, float, int): The array or number being subtracted from.
@@ -211,6 +228,9 @@ class Array:
         except TypeError as e:
             print(f"TypeError: {e}")
             return None
+        except ValueError as e:
+            print(f"ValueError: {e}")
+            return None
         except NotImplementedError:
             return NotImplemented
 
@@ -225,7 +245,7 @@ class Array:
         """Element-wise multiplies this Array with a number or array.
 
         If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        (specific data type or shape), it returns NotImplemented.
 
         Args:
             other (Array, float, int): The array or number to multiply element-wise to this array.
@@ -238,6 +258,9 @@ class Array:
             self._operator_precheck(other, True)
         except TypeError as e:
             print(f"TypeError: {e}")
+            return None
+        except ValueError as e:
+            print(f"ValueError: {e}")
             return None
         except NotImplementedError:
             return NotImplemented
@@ -253,7 +276,7 @@ class Array:
         """Element-wise multiplies this Array with a number or array.
 
         If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        (specific data type or shape), it returns NotImplemented.
 
         Args:
             other (Array, float, int): The array or number to multiply element-wise to this array.
@@ -268,7 +291,7 @@ class Array:
     def __eq__(self, other):
         """Compares an Array with another Array.
 
-        If the two array shapes do not match, it should return False.
+        If the two array shapes do not match, it returns False.
         If `other` is an unexpected type, return False.
 
         Args:
@@ -282,6 +305,9 @@ class Array:
             self._operator_precheck(other, False)
         except TypeError as e:
             print(f"TypeError: {e}")
+            return None
+        except ValueError as e:
+            print(f"ValueError: {e}")
             return None
 
         if not isinstance(other,Array):
@@ -297,7 +323,7 @@ class Array:
         """Compares an Array element-wise with another Array or number.
 
         If `other` is an array and the two array shapes do not match, this method should raise ValueError.
-        If `other` is not an array or a number, it should return TypeError.
+        If `other` is not an array or a number, it returns TypeError.
 
         Args:
             other (Array, float, int): The array or number to compare with this array.
@@ -316,6 +342,8 @@ class Array:
         except TypeError as e:
             print(f"TypeError: {e}")
             return None
+        except ValueError as e:
+            raise ValueError(f"{e}")
 
         if isinstance(other,Array):
             for i in range(len(self.flattened)):
@@ -330,7 +358,7 @@ class Array:
     def min_element(self):
         """Returns the smallest value of the array.
 
-        Only needs to work for type int and float (not boolean).
+        Does not work for booleans
 
         Returns:
             float: The value of the smallest element in the array.
@@ -345,7 +373,7 @@ class Array:
     def mean_element(self):
         """Returns the mean value of an array
 
-        Only needs to work for type int and float (not boolean).
+        Does not work for booleans
 
         Returns:
             float: the mean value
