@@ -57,7 +57,7 @@ class Array:
             total_values = reduce(lambda x,y: x*y, shape)
 
             if len(values) != total_values:
-                raise TypeError("Number of values does not line up with shape of array")
+                raise ValueError("Number of values does not line up with shape of array")
 
             # we must check for bool before int because a bool is a subclass of integers
             if isinstance(values[0],bool):
@@ -71,7 +71,7 @@ class Array:
 
             for val in values:
                 if type(val).__name__ != self.type:
-                    raise TypeError("Values must be homogeneous")
+                    raise ValueError("Values must be homogeneous")
 
             # we make it into a list so we can pop
             values = list(values)
@@ -79,6 +79,8 @@ class Array:
 
         except TypeError as e:
             print(f"TypeError: {e}")
+        except ValueError as e:
+            print(f"ValueError: {e}")
 
     def __str__(self):
         """Returns a nicely printable string representation of the array.
