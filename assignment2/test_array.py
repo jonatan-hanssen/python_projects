@@ -10,7 +10,7 @@ from array_class import Array
 zero1d = Array((4,),0,0,0,0)
 one1d = Array((4,),1,1,1,1)
 a1d = Array((4,),1,2,3,4)
-b1d = Array((4,),1,-2,3,-4)
+b1d = Array((4,),1.0,-2.0,3.0,-4.0)
 bool11d = Array((4,),True,False,True,False)
 bool21d = Array((4,),False,False,True,False)
 
@@ -18,7 +18,7 @@ bool21d = Array((4,),False,False,True,False)
 zero2d = Array((4,2),0,0,0,0,0,0,0,0)
 one2d = Array((4,2),1,1,1,1,1,1,1,1)
 a2d = Array((4,2),1,2,3,4,5,6,7,8)
-b2d = Array((4,2),1,-2,3,-4,5,-6,7,-8)
+b2d = Array((4,2),1.0,-2.0,3.0,-4.0,5.0,-6.0,7.0,-8.0)
 
 # sneakily make the 3d case have as many elements
 # as the 2d case so we dont have to change any tests
@@ -29,7 +29,7 @@ b3d = Array((2,2,2),1,-2,3,-4,5,-6,7,-8)
 
 def test_str_1d():
     assert str(a1d) == "[1, 2, 3, 4]"
-    assert str(b1d) == "[1, -2, 3, -4]"
+    assert str(b1d) == "[1.0, -2.0, 3.0, -4.0]"
 
 
 def test_add_1d():
