@@ -39,6 +39,13 @@ def test_add_1d():
     assert 1 + a1d == a1d + one1d
     assert a1d + b1d == Array((4,),2,0,6,0)
     assert a1d + b1d + b1d == Array((4,),3,-2,9,-4)
+    try:
+        a1d + bool11d
+        # it should not work so this shouldnt be executed
+        assert 0
+    except TypeError:
+        # if TypeError was raised it is correct
+        assert 1
 
 def test_sub_1d():
     assert a1d - zero1d == a1d
@@ -47,6 +54,13 @@ def test_sub_1d():
     assert 1 - a1d != a1d - one1d
     assert a1d - b1d == Array((4,),0,4,0,8)
     assert a1d - b1d - b1d == Array((4,),-1,6,-3,12)
+    try:
+        a1d - bool11d
+        # it should not work so this shouldnt be executed
+        assert 0
+    except TypeError:
+        # if TypeError was raised it is correct
+        assert 1
 
 def test_mul_1d():
     assert a1d * zero1d == Array((4,),0,0,0,0)
@@ -55,6 +69,14 @@ def test_mul_1d():
     assert a1d * one1d == a1d
     assert a1d * b1d == Array((4,),1,-4,9,-16)
     assert a1d * 10 == Array((4,),10,20,30,40)
+    assert 10 * a1d == Array((4,),10,20,30,40)
+    try:
+        a1d * bool11d
+        # it should not work so this shouldnt be executed
+        assert 0
+    except TypeError:
+        # if TypeError was raised it is correct
+        assert 1
 
 
 def test_eq_1d():
@@ -74,11 +96,25 @@ def test_same_1d():
 def test_smallest_1d():
     assert a1d.min_element() == 1
     assert b1d.min_element() == -4
+    try:
+        bool11d.min_element()
+        # it should not work so this shouldnt be executed
+        assert 0
+    except TypeError:
+        # if TypeError was raised it is correct
+        assert 1
 
 
 def test_mean_1d():
     assert a1d.mean_element() == 2.5
     assert b1d.mean_element() == -0.5
+    try:
+        bool11d.mean_element()
+        # it should not work so this shouldnt be executed
+        assert 0
+    except TypeError:
+        # if TypeError was raised it is correct
+        assert 1
 
 
 # 2D tests (Task 6)
@@ -100,6 +136,7 @@ def test_mult_2d():
     assert a2d * one2d == a2d
     assert a2d * b2d == Array((4,2),1,-4,9,-16,25,-36,49,-64)
     assert a2d * 10 == Array((4,2),10,20,30,40,50,60,70,80)
+    assert 10 * a2d == Array((4,2),10,20,30,40,50,60,70,80)
 
 
 def test_same_2d():
@@ -131,6 +168,7 @@ def test_mult_3d():
     assert a3d * one3d == a3d
     assert a3d * b3d == Array((2,2,2),1,-4,9,-16,25,-36,49,-64)
     assert a3d * 10 == Array((2,2,2),10,20,30,40,50,60,70,80)
+    assert 10 * a3d == Array((2,2,2),10,20,30,40,50,60,70,80)
 
 
 def test_same_3d():
