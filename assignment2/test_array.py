@@ -11,7 +11,9 @@ zero1d = Array((4,),0,0,0,0)
 one1d = Array((4,),1,1,1,1)
 a1d = Array((4,),1,2,3,4)
 b1d = Array((4,),1,-2,3,-4)
-bool1d = Array((4,),True,False,True,False)
+bool11d = Array((4,),True,False,True,False)
+bool21d = Array((4,),False,False,True,False)
+
 
 zero2d = Array((4,2),0,0,0,0,0,0,0,0)
 one2d = Array((4,2),1,1,1,1,1,1,1,1)
@@ -58,11 +60,15 @@ def test_mul_1d():
 def test_eq_1d():
     assert (a1d == a1d) == True
     assert (a1d == b1d) == False
+    assert (bool11d == bool11d) == True
+    assert (bool21d == bool11d) == False
 
 
 def test_same_1d():
     assert a1d.is_equal(a1d) == True
     assert a1d.is_equal(b1d) == False
+    assert bool11d.is_equal(bool11d) == True
+    assert bool11d.is_equal(bool21d) == False
 
 
 def test_smallest_1d():
