@@ -303,14 +303,12 @@ class Array:
         self._operator_precheck(other, False)
 
         if isinstance(other,Array):
-            for i in range(len(self.flattened)):
-                if not self.flattened[i] == other.flattened[i]:
-                    return False
+            new_values = [self.flattened[i] == other.flattened[i] for i in range(len(self.flattened))]
         else:
-            for i in range(len(self.flattened)):
-                if not self.flattened[i] == other:
-                    return False
-        return True
+            new_values = [self.flattened[i] == other for i in range(len(self.flattened))]
+
+        return Array(self.shape, *new_values)
+
 
     def min_element(self):
         """Returns the smallest value of the array.

@@ -87,10 +87,11 @@ def test_eq_1d():
 
 
 def test_same_1d():
-    assert a1d.is_equal(a1d) == True
-    assert a1d.is_equal(b1d) == False
-    assert bool11d.is_equal(bool11d) == True
-    assert bool11d.is_equal(bool21d) == False
+    assert a1d.is_equal(a1d) == Array((4,),True,True,True,True)
+    assert a1d.is_equal(b1d) == Array((4,),True,False,True,False)
+    assert bool11d.is_equal(bool11d) == Array((4,),True,True,True,True)
+    assert bool11d.is_equal(bool21d) == Array((4,),False,True,True,True)
+    assert one1d.is_equal(1) == Array((4,),True,True,True,True)
 
 
 def test_smallest_1d():
@@ -140,8 +141,8 @@ def test_mult_2d():
 
 
 def test_same_2d():
-    assert a2d.is_equal(a2d) == True
-    assert a2d.is_equal(b2d) == False
+    assert a2d.is_equal(a2d) == Array((4,2),True,True,True,True,True,True,True,True)
+    assert a2d.is_equal(b2d) == Array((4,2),True,False,True,False,True,False,True,False)
 
 
 def test_mean_2d():
@@ -172,8 +173,8 @@ def test_mult_3d():
 
 
 def test_same_3d():
-    assert a3d.is_equal(a3d) == True
-    assert a3d.is_equal(b3d) == False
+    assert a3d.is_equal(a3d) == Array((2,2,2),True,True,True,True,True,True,True,True)
+    assert a3d.is_equal(b3d) == Array((2,2,2),True,False,True,False,True,False,True,False)
 
 
 def test_mean_3d():
