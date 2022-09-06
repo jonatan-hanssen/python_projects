@@ -39,48 +39,42 @@ class Array:
         """
 
 
-        try:
-            # --------- error checking ---------
+        # --------- error checking ---------
 
-            # shape:
-            if not isinstance(shape,tuple):
-                raise TypeError("Shape must be a tuple")
-            if len(shape) == 0:
-                raise TypeError("Shape tuple cannot be empty")
-            for val in shape:
-                if not isinstance(val,int):
-                    raise TypeError("Values in shape must be integers")
+        # shape:
+        if not isinstance(shape,tuple):
+            raise TypeError("Shape must be a tuple")
+        if len(shape) == 0:
+            raise TypeError("Shape tuple cannot be empty")
+        for val in shape:
+            if not isinstance(val,int):
+                raise TypeError("Values in shape must be integers")
 
-            # values:
+        # values:
 
-            # calculates the spots in the array by multiplying everything in shape
-            total_values = reduce(lambda x,y: x*y, shape)
+        # calculates the spots in the array by multiplying everything in shape
+        total_values = reduce(lambda x,y: x*y, shape)
 
-            if len(values) != total_values:
-                raise ValueError("Number of values does not line up with shape of array")
+        if len(values) != total_values:
+            raise ValueError("Number of values does not line up with shape of array")
 
-            # we must check for bool before int because a bool is a subclass of integers
-            if isinstance(values[0],bool):
-                self.type = "bool"
-            elif isinstance(values[0],int):
-                self.type = "int"
-            elif isinstance(values[0],float):
-                self.type = "float"
-            else:
-                raise TypeError("Values must be integers, floats or booleans")
+        # we must check for bool before int because a bool is a subclass of integers
+        if isinstance(values[0],bool):
+            self.type = "bool"
+        elif isinstance(values[0],int):
+            self.type = "int"
+        elif isinstance(values[0],float):
+            self.type = "float"
+        else:
+            raise TypeError("Values must be integers, floats or booleans")
 
-            for val in values:
-                if type(val).__name__ != self.type:
-                    raise ValueError("Values must be homogeneous")
+        for val in values:
+            if type(val).__name__ != self.type:
+                raise ValueError("Values must be homogeneous")
 
-            # we make it into a list so we can pop
-            values = list(values)
-            self._fill_list(self.data, shape, values, 0)
-
-        except TypeError as e:
-            print(f"TypeError: {e}")
-        except ValueError as e:
-            print(f"ValueError: {e}")
+        # we make it into a list so we can pop
+        values = list(values)
+        self._fill_list(self.data, shape, values, 0)
 
     def __str__(self):
         """Returns a nicely printable string representation of the array.
@@ -143,12 +137,6 @@ class Array:
         """
         try:
             self._operator_precheck(other, True)
-        except TypeError as e:
-            print(f"TypeError: {e}")
-            return None
-        except ValueError as e:
-            print(f"ValueError: {e}")
-            return None
         except NotImplementedError:
             return NotImplemented
 
@@ -192,12 +180,6 @@ class Array:
         """
         try:
             self._operator_precheck(other, True)
-        except TypeError as e:
-            print(f"TypeError: {e}")
-            return None
-        except ValueError as e:
-            print(f"ValueError: {e}")
-            return None
         except NotImplementedError:
             return NotImplemented
 
@@ -225,12 +207,6 @@ class Array:
         # subtraction is not commutative so we actually have to write it again
         try:
             self._operator_precheck(other, True)
-        except TypeError as e:
-            print(f"TypeError: {e}")
-            return None
-        except ValueError as e:
-            print(f"ValueError: {e}")
-            return None
         except NotImplementedError:
             return NotImplemented
 
@@ -256,12 +232,6 @@ class Array:
         """
         try:
             self._operator_precheck(other, True)
-        except TypeError as e:
-            print(f"TypeError: {e}")
-            return None
-        except ValueError as e:
-            print(f"ValueError: {e}")
-            return None
         except NotImplementedError:
             return NotImplemented
 
@@ -301,14 +271,7 @@ class Array:
             bool: True if the two arrays are equal (identical). False otherwise.
 
         """
-        try:
-            self._operator_precheck(other, False)
-        except TypeError as e:
-            print(f"TypeError: {e}")
-            return None
-        except ValueError as e:
-            print(f"ValueError: {e}")
-            return None
+        self._operator_precheck(other, False)
 
         if not isinstance(other,Array):
             raise TypeError(f"Illegal operation between Array and {type(other).__name__}")
@@ -337,13 +300,7 @@ class Array:
             ValueError: if the shape of self and other are not equal.
 
         """
-        try:
-            self._operator_precheck(other, False)
-        except TypeError as e:
-            print(f"TypeError: {e}")
-            return None
-        except ValueError as e:
-            raise ValueError(f"{e}")
+        self._operator_precheck(other, False)
 
         if isinstance(other,Array):
             for i in range(len(self.flattened)):
