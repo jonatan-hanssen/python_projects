@@ -13,12 +13,18 @@ def numpy_color2gray(image: np.array) -> np.array:
         np.array: gray_image
     """
 
+    pixels = np.asarray(image)
     gray_image = np.empty_like(image)
 
-    # Hint: use numpy slicing in order to have fast vectorized code
-    ...
-    # Return image (make sure it's the right type!)
-    return gray_image
+    gray_transform = np.array([0.21, 0.72, 0.07])
+
+    gray_image = np.empty_like(image)
+
+    gray_image[:,:,0] = pixels[:,:,0]*gray_transform[0]
+    gray_image[:,:,1] = pixels[:,:,1]*gray_transform[1]
+    gray_image[:,:,2] = pixels[:,:,2]*gray_transform[2]
+
+    return gray_image.astype("uint8")
 
 
 def numpy_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
