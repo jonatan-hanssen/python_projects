@@ -15,7 +15,7 @@ name = "Instapy"
 description = "A tool to filter images"
 readme = "README.md"
 dependencies = [
-	"numpy",
+	"numpy==1.21.*",
 	"numba",
 	"pillow",
 ]
