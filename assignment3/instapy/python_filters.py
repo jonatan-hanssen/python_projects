@@ -11,11 +11,24 @@ def python_color2gray(image: np.array) -> np.array:
     Returns:
         np.array: gray_image
     """
+    pixels = np.asarray(image)
     gray_image = np.empty_like(image)
+
+    m, n, p = pixels.shape
+    gray_transform = [0.21, 0.72, 0.07]
+
+    for i in range(m):
+        for j in range(n):
+            for k in range(p):
+                gray_image[i][j][k] = pixels[i][j][k]*gray_transform[k]
+
+    print(pixels[0,0])
+    print(gray_image[0,0])
+
     # iterate through the pixels, and apply the grayscale transform
 
-    ...
-    return gray_image
+    # return pixels
+    return gray_image.astype("uint8")
 
 
 def python_color2sepia(image: np.array) -> np.array:
