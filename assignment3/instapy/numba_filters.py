@@ -13,18 +13,14 @@ def numba_color2gray(image: np.array) -> np.array:
         np.array: gray_image
     """
     gray_image = np.empty_like(image)
-    # iterate through the pixels, and apply the grayscale transform
 
-    pixels = np.asarray(image)
-    gray_image = np.empty_like(image)
-
-    m, n, p = pixels.shape
+    m, n, p = image.shape
     gray_transform = [0.21, 0.72, 0.07]
 
     for i in range(m):
         for j in range(n):
             for k in range(p):
-                gray_image[i][j][k] = pixels[i][j][k]*gray_transform[k]
+                gray_image[i][j][k] = image[i][j][k]*gray_transform[k]
 
     return gray_image.astype("uint8")
 
