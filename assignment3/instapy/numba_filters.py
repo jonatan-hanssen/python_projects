@@ -3,7 +3,7 @@ from numba import jit
 import numpy as np
 
 
-@jit
+@jit(nopython=True)
 def numba_color2gray(image: np.array) -> np.array:
     """Convert rgb pixel array to grayscale
 
@@ -24,7 +24,7 @@ def numba_color2gray(image: np.array) -> np.array:
 
     return gray_image.astype("uint8")
 
-
+@jit(nopython=True)
 def numba_color2sepia(image: np.array) -> np.array:
     """Convert rgb pixel array to sepia
 
@@ -33,15 +33,27 @@ def numba_color2sepia(image: np.array) -> np.array:
     Returns:
         np.array: sepia_image
     """
-    sepia_image = np.empty_like(image)
-    # Iterate through the pixels
-    # applying the sepia matrix
+    sepia_image = np.empty_like(image,dtype="float32")
+    m, n, p = image.shape
 
-    ...
+    sepia_matrix = [
+        [ 0.393, 0.769, 0.189],
+        [ 0.349, 0.686, 0.168],
+        [ 0.272, 0.534, 0.131],
+    ]
 
-    # Return image
-    # don't forget to make sure it's the right type!
-    return sepia_image
+    for i in range(m):
+        for j in range(n):
+            for k in range(p):
+                sepia_image[i][j][k] = image[i][j][0]*sepia_matrix[k][0]
+                sepia_image[i][j][k] += image[i][j][1]*sepia_matrix[k][1]
+                sepia_image[i][j][k] += image[i][j][2]*sepia_matrix[k][2]
+            # fix overflows
+            highest = max(sepia_image[i][j])
+            if highest > 255:
+                ratio = 255/highest
+                sepia_image[i][j][0] *= ratio
+                sepia_image[i][j][1] *= ratio
+                sepia_image[i][j][2] *= ratio
 
-
-...
+    return sepia_image.astype("uint8")
