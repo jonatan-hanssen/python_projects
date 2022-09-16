@@ -47,8 +47,7 @@ def python_color2sepia(image: np.array) -> np.array:
     for i in range(m):
         for j in range(n):
             for k in range(p):
-                sepia_image[i][j][k] = 0
-                sepia_image[i][j][k] += image[i][j][0]*sepia_matrix[k][0]
+                sepia_image[i][j][k] = image[i][j][0]*sepia_matrix[k][0]
                 sepia_image[i][j][k] += image[i][j][1]*sepia_matrix[k][1]
                 sepia_image[i][j][k] += image[i][j][2]*sepia_matrix[k][2]
             # fix overflows

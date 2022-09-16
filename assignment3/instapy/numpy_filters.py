@@ -47,7 +47,7 @@ def numpy_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
     if not 0 <= k <= 1:
         raise ValueError(f"k must be between [0-1], got {k=}")
 
-    sepia_image = np.zeros(image.shape,dtype="float16")
+    sepia_image = np.empty_like(image,dtype="float16")
 
     # define sepia matrix (optional: with `k` tuning parameter for bonus task 13)
     sepia_matrix = np.array([
