@@ -7,9 +7,10 @@ For Task 6.
 """
 import time
 import instapy
-from . import io
+from . import io, numba_filters, python_filters, numpy_filters
 from typing import Callable
 import numpy as np
+from PIL import Image
 
 
 def time_one(filter_function: Callable, *arguments, calls: int = 3) -> float:
@@ -30,9 +31,12 @@ def time_one(filter_function: Callable, *arguments, calls: int = 3) -> float:
         time (float):
             The average time (in seconds) to run filter_function(*arguments)
     """
-    # run the filter function `calls` times
-    # return the _average_ time of one call
-    ...
+    total = 0
+    for i in range(calls):
+        start = time.time()
+        filter_function(*arguments)
+        total += (time.time() - start)
+    return total/calls
 
 
 def make_reports(filename: str = "test/rain.jpg", calls: int = 3):
@@ -45,27 +49,28 @@ def make_reports(filename: str = "test/rain.jpg", calls: int = 3):
     """
 
     # load the image
-    image = ...
+    image = Image.open(filename)
+    pixels = np.asarray(image)
     # print the image name, width, height
-    ...
+    print(f"Timing performed using {filename}: {pixels.shape[0]}x{pixels.shape[1]}")
     # iterate through the filters
-    filter_names = ...
+    filter_names = ["color2gray", "color2sepia"]
     for filter_name in filter_names:
         # get the reference filter function
-        reference_filter = ...
+        reference_filter = python_filters.python_color2gray
         # time the reference implementation
-        reference_time = ...
+        reference_time = time_one(reference_filter,pixels)
         print(
             f"Reference (pure Python) filter time {filter_name}: {reference_time:.3}s ({calls=})"
         )
         # iterate through the implementations
-        implementations = ...
+        implementations = ["numpy", "numba"]
         for implementation in implementations:
-            filter = ...
+            filter = numpy_filters.numpy_color2gray if implementation == "numpy" else numba_filters.numba_color2gray
             # time the filter
-            filter_time = ...
+            filter_time = time_one(filter,pixels)
             # compare the reference time to the optimized time
-            speedup = ...
+            speedup = reference_time/filter_time
             print(
                 f"Timing: {implementation} {filter_name}: {filter_time:.3}s ({speedup=:.2f}x)"
             )
