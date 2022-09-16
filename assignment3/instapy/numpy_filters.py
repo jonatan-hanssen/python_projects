@@ -42,23 +42,33 @@ def numpy_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
     Returns:
         np.array: sepia_image
     """
+    M, N, K = image.shape
 
     if not 0 <= k <= 1:
-        # validate k (optional)
         raise ValueError(f"k must be between [0-1], got {k=}")
 
-    sepia_image = ...
+    sepia_image = np.zeros(image.shape,dtype="float16")
 
     # define sepia matrix (optional: with `k` tuning parameter for bonus task 13)
-    sepia_matrix = ...
+    sepia_matrix = np.array([
+        [ 0.393, 0.769, 0.189],
+        [ 0.349, 0.686, 0.168],
+        [ 0.272, 0.534, 0.131],
+    ])
 
-    # HINT: For version without adaptive sepia filter, use the same matrix as in the pure python implementation
-    # use Einstein sum to apply pixel transform matrix
-    # Apply the matrix filter
-    sepia_image = ...
+    # it just works ladies and gentlemen
+    sepia_image = np.einsum('ijk,lk->ijl',image, sepia_matrix)
 
-    # Check which entries have a value greater than 255 and set it to 255 since we can not display values bigger than 255
-    ...
+    # fix overflows
 
-    # Return image (make sure it's the right type!)
-    return sepia_image
+    # find the highest value along the third axis (the rgb values)
+    maxes = sepia_image.max(2) # this returns a M,N array
+
+    overflows = np.where(maxes > 255, maxes, 255) # an array of 255 or higher values
+    ratios = (np.ones((M,N))*255)/overflows # this is either one or something lower
+
+    # this multiplies every pixel value with either one or the appropriate ratio in case
+    # of overflows
+    sepia_image *= np.dstack((ratios,ratios,ratios))
+
+    return sepia_image.astype("uint8")
