@@ -47,6 +47,21 @@ def make_reports(filename: str = "test/rain.jpg", calls: int = 3):
     Args:
         filename (str): the image file to use
     """
+    implementation_dict = {
+            "color2gray": {
+                "python": python_filters.python_color2gray,
+                "numpy": numpy_filters.numpy_color2gray,
+                "numba": numba_filters.numba_color2gray
+                },
+            "color2sepia": {
+                "python": python_filters.python_color2sepia,
+                "numpy": numpy_filters.numpy_color2sepia,
+                "numba": numba_filters.numba_color2sepia
+                }
+            }
+
+    filter_names = ["color2gray", "color2sepia"]
+    implementations = ["numpy", "numba"]
 
     # load the image
     image = Image.open(filename)
@@ -54,19 +69,17 @@ def make_reports(filename: str = "test/rain.jpg", calls: int = 3):
     # print the image name, width, height
     print(f"Timing performed using {filename}: {pixels.shape[0]}x{pixels.shape[1]}")
     # iterate through the filters
-    filter_names = ["color2gray", "color2sepia"]
     for filter_name in filter_names:
         # get the reference filter function
-        reference_filter = python_filters.python_color2gray
+        reference_filter = implementation_dict[filter_name]["python"]
         # time the reference implementation
         reference_time = time_one(reference_filter,pixels)
         print(
-            f"Reference (pure Python) filter time {filter_name}: {reference_time:.3}s ({calls=})"
+            f"\nReference (pure Python) filter time {filter_name}: {reference_time:.3}s ({calls=})"
         )
         # iterate through the implementations
-        implementations = ["numpy", "numba"]
         for implementation in implementations:
-            filter = numpy_filters.numpy_color2gray if implementation == "numpy" else numba_filters.numba_color2gray
+            filter = implementation_dict[filter_name][implementation]
             # time the filter
             filter_time = time_one(filter,pixels)
             # compare the reference time to the optimized time
