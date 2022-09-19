@@ -3,6 +3,7 @@ from functools import lru_cache
 
 import pytest
 
+import numpy as np
 from instapy import io
 from instapy.python_filters import python_color2gray, python_color2sepia
 
@@ -18,7 +19,7 @@ def default_image():
 def random_image():
     # use seed to always generate the same image
     # useful for debugging
-    # np.random.seed(1)
+    # np.random.seed(5)
     return io.random_image()
 
 
