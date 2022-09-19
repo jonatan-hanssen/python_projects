@@ -42,7 +42,7 @@ def numpy_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
     Returns:
         np.array: sepia_image
     """
-    M, N, K = image.shape
+    m, n, p = image.shape
 
     if not 0 <= k <= 1:
         raise ValueError(f"k must be between [0-1], got {k=}")
@@ -50,11 +50,28 @@ def numpy_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
     sepia_image = np.empty_like(image,dtype="float16")
 
     # define sepia matrix (optional: with `k` tuning parameter for bonus task 13)
+
+
+    # what does "tuning" sepia mean? I dont know anything about the sepia filter
+    # so I dont know if it makes any sense to have k linearly turn the sepia matrix
+    # into the identity matrix or not. Maybe it should exponentially do it or
+    # maybe the values should move by some polynomial between idenitity and sepia.
+    # Regardless, this seems to work: linearly move the sepia matrix to the identity
+    # matrix as a function of k
     sepia_matrix = np.array([
         [ 0.393, 0.769, 0.189],
         [ 0.349, 0.686, 0.168],
         [ 0.272, 0.534, 0.131],
     ])
+
+    scaling_matrix = np.array([
+        [ 0.607, -0.769, -0.189],
+        [ -0.349, 0.314, -0.168],
+        [ -0.272, -0.534, 0.869],
+    ])
+
+    # assume that k should scale the values linearly, simply add the scaling matrix
+    sepia_matrix += scaling_matrix*(1-k)
 
     # it just works ladies and gentlemen
     sepia_image = np.einsum('ijk,lk->ijl',image, sepia_matrix)
@@ -65,7 +82,7 @@ def numpy_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
     maxes = sepia_image.max(2) # this returns a M,N array
 
     overflows = np.where(maxes > 255, maxes, 255) # an array of 255 or higher values
-    ratios = (np.ones((M,N))*255)/overflows # this is either one or something lower
+    ratios = (np.ones((m,n))*255)/overflows # this is either one or something lower
 
     # this multiplies every pixel value with either one or the appropriate ratio in case
     # of overflows
