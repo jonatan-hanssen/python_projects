@@ -13,11 +13,9 @@ def numpy_color2gray(image: np.array) -> np.array:
         np.array: gray_image
     """
 
-    gray_image = np.empty_like(image)
-
     gray_transform = np.array([0.21, 0.72, 0.07])
 
-    gray_image = np.empty_like(image)
+    gray_image = np.empty_like(image,dtype="float32")
 
     # einsum works as follows: we say that gray_transform has an axis labeled k.
     # we then say that image has axises labeled ijk, and because we labeled the last
@@ -52,7 +50,7 @@ def numpy_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
     if not 0 <= k <= 1:
         raise ValueError(f"k must be between [0-1], got {k=}")
 
-    sepia_image = np.empty_like(image,dtype="float16")
+    sepia_image = np.empty_like(image,dtype="float32")
 
     # define sepia matrix (optional: with `k` tuning parameter for bonus task 13)
 

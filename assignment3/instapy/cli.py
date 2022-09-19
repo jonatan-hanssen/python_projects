@@ -14,7 +14,7 @@ from . import timing
 def run_filter(
     file: str,
     *, # it seemed more reasonable to solve this with kwargs
-    out_file: str = None,
+    out: str = None,
     # we dont want the slowest implementation to be the default
     implementation: str = "numpy",
     # scale factor should be an float, not a int
@@ -58,8 +58,8 @@ def run_filter(
             time, filtered = timing.time_one(filter_func, pixels)
         print(f"Average time over 3 runs: {time:.3}s using {implementation}")
 
-    if out_file:
-        io.write_image(filtered,out_file)
+    if out:
+        io.write_image(filtered,out)
     else:
         # not asked to save, display it instead
         io.display(filtered)

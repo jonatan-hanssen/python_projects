@@ -12,7 +12,7 @@ def python_color2gray(image: np.array) -> np.array:
     Returns:
         np.array: gray_image
     """
-    gray_image = np.empty_like(image)
+    gray_image = np.empty_like(image,dtype="float32")
 
     m, n, p = image.shape
     gray_transform = [0.21, 0.72, 0.07]
@@ -38,7 +38,7 @@ def python_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
     Returns:
         np.array: sepia_image
     """
-    sepia_image = np.empty_like(image,dtype="float16")
+    sepia_image = np.empty_like(image,dtype="float32")
     m, n, p = image.shape
 
     if not 0 <= k <= 1:
