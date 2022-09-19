@@ -22,4 +22,4 @@ dependencies = [
 
 
 [project.scripts]
-# instapy = "..."
+instapy = "instapy.cli:main"

@@ -7,13 +7,13 @@ For Task 6.
 """
 import time
 import instapy
-from . import io, numba_filters, python_filters, numpy_filters
-from typing import Callable
+from . import io
+from typing import Callable, Tuple
 import numpy as np
 from PIL import Image
 
 
-def time_one(filter_function: Callable, *arguments, calls: int = 3) -> float:
+def time_one(filter_function: Callable, *arguments, calls: int = 3) -> Tuple[float, np.ndarray]:
     """Return the time for one call
 
     When measuring, repeat the call `calls` times,
@@ -34,9 +34,9 @@ def time_one(filter_function: Callable, *arguments, calls: int = 3) -> float:
     total = 0
     for i in range(calls):
         start = time.time()
-        filter_function(*arguments)
+        output = filter_function(*arguments)
         total += (time.time() - start)
-    return total/calls
+    return total/calls, output
 
 
 def make_reports(filename: str = "test/rain.jpg", calls: int = 3):
@@ -47,18 +47,6 @@ def make_reports(filename: str = "test/rain.jpg", calls: int = 3):
     Args:
         filename (str): the image file to use
     """
-    implementation_dict = {
-            "color2gray": {
-                "python": python_filters.python_color2gray,
-                "numpy": numpy_filters.numpy_color2gray,
-                "numba": numba_filters.numba_color2gray
-                },
-            "color2sepia": {
-                "python": python_filters.python_color2sepia,
-                "numpy": numpy_filters.numpy_color2sepia,
-                "numba": numba_filters.numba_color2sepia
-                }
-            }
 
     filter_names = ["color2gray", "color2sepia"]
     implementations = ["numpy", "numba"]
@@ -71,17 +59,17 @@ def make_reports(filename: str = "test/rain.jpg", calls: int = 3):
     # iterate through the filters
     for filter_name in filter_names:
         # get the reference filter function
-        reference_filter = implementation_dict[filter_name]["python"]
+        reference_filter = instapy.get_filter(filter_name, "python")
         # time the reference implementation
-        reference_time = time_one(reference_filter,pixels)
+        reference_time, _ = time_one(reference_filter,pixels)
         print(
             f"\nReference (pure Python) filter time {filter_name}: {reference_time:.3}s ({calls=})"
         )
         # iterate through the implementations
         for implementation in implementations:
-            filter = implementation_dict[filter_name][implementation]
+            filter = instapy.get_filter(filter_name, implementation)
             # time the filter
-            filter_time = time_one(filter,pixels)
+            filter_time, _ = time_one(filter,pixels)
             # compare the reference time to the optimized time
             speedup = reference_time/filter_time
             print(
