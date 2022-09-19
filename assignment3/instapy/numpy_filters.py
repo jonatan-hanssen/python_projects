@@ -19,9 +19,14 @@ def numpy_color2gray(image: np.array) -> np.array:
 
     gray_image = np.empty_like(image)
 
-    gray_image[:,:,0] = image[:,:,0]*gray_transform[0]
-    gray_image[:,:,1] = image[:,:,1]*gray_transform[1]
-    gray_image[:,:,2] = image[:,:,2]*gray_transform[2]
+    # einsum works as follows: we say that gray_transform has an axis labeled k.
+    # we then say that image has axises labeled ijk, and because we labeled the last
+    # one k we tell numpy we want to multiply over this axis. We the label the output
+    # array with ij, which says we want to sum over the axis k aswell. This
+    # gives us the desired output.
+    gray_image = np.einsum("k,ijk->ij",gray_transform, image)
+    # However, we want to return an rgb image, which means 3 values for each x,y
+    gray_image = np.dstack((gray_image,gray_image,gray_image))
 
     return gray_image.astype("uint8")
 

@@ -20,8 +20,13 @@ def numba_color2gray(image: np.array) -> np.array:
 
     for i in range(m):
         for j in range(n):
-            for k in range(p):
-                gray_image[i][j][k] = image[i][j][k]*gray_transform[k]
+            gray_val = image[i][j][0]*gray_transform[0]
+            gray_val += image[i][j][1]*gray_transform[1]
+            gray_val += image[i][j][2]*gray_transform[2]
+
+            gray_image[i][j][0] = gray_val
+            gray_image[i][j][1] = gray_val
+            gray_image[i][j][2] = gray_val
 
     return gray_image.astype("uint8")
 
