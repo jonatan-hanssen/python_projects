@@ -20,15 +20,16 @@ def numba_color2gray(image: np.array) -> np.array:
 
     for i in range(m):
         for j in range(n):
-            gray_val = image[i][j][0]*gray_transform[0]
-            gray_val += image[i][j][1]*gray_transform[1]
-            gray_val += image[i][j][2]*gray_transform[2]
+            gray_val = image[i][j][0] * gray_transform[0]
+            gray_val += image[i][j][1] * gray_transform[1]
+            gray_val += image[i][j][2] * gray_transform[2]
 
             gray_image[i][j][0] = gray_val
             gray_image[i][j][1] = gray_val
             gray_image[i][j][2] = gray_val
 
     return gray_image.astype("uint8")
+
 
 @jit(nopython=True)
 def numba_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
@@ -39,7 +40,7 @@ def numba_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
     Returns:
         np.array: sepia_image
     """
-    sepia_image = np.empty_like(image,dtype="float32")
+    sepia_image = np.empty_like(image, dtype="float32")
     m, n, p = image.shape
 
     if not 0 <= k <= 1:
@@ -57,35 +58,34 @@ def numba_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
     # Regardless, this seems to work: linearly move the sepia matrix to the identity
     # matrix as a function of k
     sepia_matrix = [
-        [ 0.393, 0.769, 0.189],
-        [ 0.349, 0.686, 0.168],
-        [ 0.272, 0.534, 0.131],
+        [0.393, 0.769, 0.189],
+        [0.349, 0.686, 0.168],
+        [0.272, 0.534, 0.131],
     ]
 
     scaling_matrix = [
-        [ 0.607, -0.769, -0.189],
-        [ -0.349, 0.314, -0.168],
-        [ -0.272, -0.534, 0.869],
+        [0.607, -0.769, -0.189],
+        [-0.349, 0.314, -0.168],
+        [-0.272, -0.534, 0.869],
     ]
 
     # assume that k should scale the values linearly, simply add the scaling matrix
     for i in range(3):
         for j in range(3):
-            sepia_matrix[i][j] += scaling_matrix[i][j]*(1-k)
+            sepia_matrix[i][j] += scaling_matrix[i][j] * (1 - k)
 
     highest = 0
     for i in range(m):
         for j in range(n):
             for k in range(p):
-                sepia_image[i][j][k] = image[i][j][0]*sepia_matrix[k][0]
-                sepia_image[i][j][k] += image[i][j][1]*sepia_matrix[k][1]
-                sepia_image[i][j][k] += image[i][j][2]*sepia_matrix[k][2]
+                sepia_image[i][j][k] = image[i][j][0] * sepia_matrix[k][0]
+                sepia_image[i][j][k] += image[i][j][1] * sepia_matrix[k][1]
+                sepia_image[i][j][k] += image[i][j][2] * sepia_matrix[k][2]
             highest = max(max(sepia_image[i][j]), highest)
-
 
     # fix overflows
     if highest > 255:
-        ratio = 255/highest
+        ratio = 255 / highest
         for i in range(m):
             for j in range(n):
                 for k in range(p):
