@@ -80,15 +80,6 @@ def numpy_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
     sepia_image = np.einsum('ijk,lk->ijl',image, sepia_matrix)
 
     # fix overflows
-
-    # find the highest value along the third axis (the rgb values)
-    maxes = sepia_image.max(2) # this returns a M,N array
-
-    overflows = np.where(maxes > 255, maxes, 255) # an array of 255 or higher values
-    ratios = (np.ones((m,n))*255)/overflows # this is either one or something lower
-
-    # this multiplies every pixel value with either one or the appropriate ratio in case
-    # of overflows
-    sepia_image *= np.dstack((ratios,ratios,ratios))
+    sepia_image *= 255/(sepia_image.max())
 
     return sepia_image.astype("uint8")

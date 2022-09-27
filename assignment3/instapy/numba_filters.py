@@ -73,18 +73,22 @@ def numba_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
         for j in range(3):
             sepia_matrix[i][j] += scaling_matrix[i][j]*(1-k)
 
+    highest = 0
     for i in range(m):
         for j in range(n):
             for k in range(p):
                 sepia_image[i][j][k] = image[i][j][0]*sepia_matrix[k][0]
                 sepia_image[i][j][k] += image[i][j][1]*sepia_matrix[k][1]
                 sepia_image[i][j][k] += image[i][j][2]*sepia_matrix[k][2]
-            # fix overflows
-            highest = max(sepia_image[i][j])
-            if highest > 255:
-                ratio = 255/highest
-                sepia_image[i][j][0] *= ratio
-                sepia_image[i][j][1] *= ratio
-                sepia_image[i][j][2] *= ratio
+            highest = max(max(sepia_image[i][j]), highest)
+
+
+    # fix overflows
+    if highest > 255:
+        ratio = 255/highest
+        for i in range(m):
+            for j in range(n):
+                for k in range(p):
+                    sepia_image[i][j][k] *= ratio
 
     return sepia_image.astype("uint8")
