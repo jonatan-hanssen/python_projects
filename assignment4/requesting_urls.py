@@ -20,13 +20,18 @@ def get_html(url: str, params: Optional[Dict] = None, output: Optional[str] = No
             The HTML of the page, as text.
     """
     # passing the optional parameters argument to the get function
-    response = ...
+    response = requests.get(url, params=params)
 
-    html_str = ...
+    html_str = response.text
 
     if output:
         # if output is specified, the response txt and url get printed to a
         # txt file with the name in `output`
-        ...
+
+        # I will do no checking to see if it is a .txt file. You should be able to write to any file
+        # you want. File extensions dont really matter unless you want to double click the file instead of
+        # opening it in the terminal.
+        with open(output, "w") as file:
+            file.write(f"HTTP GET request at {response.url}:\n{response.text}")
 
     return html_str
