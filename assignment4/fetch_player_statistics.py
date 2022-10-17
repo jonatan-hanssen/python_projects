@@ -37,38 +37,37 @@ def find_best_players(url: str) -> None:
     # gets the teams
     teams = get_teams(url)
     # assert len(teams) == 8
+    print(type(teams))
+    # teams = teams[:3]
 
     # Gets the player for every team and stores in dict (get_players)
-    all_players = ...
+    all_players = dict()
+
+    for team in teams:
+        all_players[team["name"]] = get_players(team["url"])
 
     # get player statistics for each player,
     # using get_player_stats
     for team, players in all_players.items():
-        ...
-
-    # at this point, we should have a dict of the form:
-    # {
-    #     "team name": [
-    #         {
-    #             "name": "player name",
-    #             "url": "https://player_url",
-    #             # added by get_player_stats
-    #             "points": 5,
-    #             "assists": 1.2,
-    #             # ...,
-    #         },
-    #     ]
-    # }
+        for player in players:
+            player.update(get_player_stats(player["url"], team))
 
     # Select top 3 for each team by points:
     best = {}
-    top_stat = ...
-    for team, players in all_players.items():
-        # Sort and extract top 3 based on points
-        top_3 = ...
-        ...
+    for team in teams:
+        best[team["name"]] = list()
 
-    stats_to_plot = ...
+    for i in range(3):
+        for team_name in all_players:
+            num_players = len(all_players[team_name])
+
+            # best_index = max(range(num_players), all_players[team_name], key=lambda x: x["points"])
+            best_index = max(
+                range(num_players), key=lambda x: all_players[team_name][x]["points"]
+            )
+            best[team_name].append(all_players[team_name].pop(best_index))
+
+    stats_to_plot = ["points", "assists", "rebounds"]
     for stat in stats_to_plot:
         plot_best(best, stat=stat)
 
@@ -99,7 +98,68 @@ def plot_best(best: Dict[str, List[Dict]], stat: str = "points") -> None:
             Should be a key in the player info dictionary.
     """
     stats_dir = "NBA_player_statistics"
-    ...
+    for team_name in best:
+        best[team_name].sort(key=lambda x: x[stat])
+
+    X = list(best)
+    first = list()
+    f_name = list()
+
+    second = list()
+    s_name = list()
+
+    third = list()
+    t_name = list()
+
+    for team_name in best:
+        first.append(best[team_name][2][stat])
+        f_name.append(best[team_name][2]["name"])
+
+        second.append(best[team_name][1][stat])
+        s_name.append(best[team_name][1]["name"])
+
+        third.append(best[team_name][0][stat])
+        t_name.append(best[team_name][0]["name"])
+
+    X_axis = np.arange(len(X))
+
+    max_val = max(first + second + third)
+
+    fig, ax = plt.subplots()
+
+    width = 0.3
+    p1 = ax.bar(X_axis - width, first, width, label="First")
+    p2 = ax.bar(X_axis, second, width, label="Second")
+    p3 = ax.bar(X_axis + width, third, width, label="Third")
+
+    ax.bar_label(
+        p1,
+        f_name,
+        rotation=90,
+        padding=4,
+    )
+
+    ax.bar_label(
+        p2,
+        s_name,
+        rotation=90,
+        padding=4,
+    )
+
+    ax.bar_label(
+        p3,
+        t_name,
+        rotation=90,
+        padding=4,
+    )
+
+    ax.set_xticks(X_axis, X)
+    ax.set_xlabel("Team")
+    ax.set_ylabel(f"{stat} per game")
+    ax.set_title(f"{stat} per game for 2021-22 NBA regular season")
+    ax.set_ylim(0, max_val * 1.5)
+    ax.legend()
+    plt.show()
 
 
 def get_teams(url: str) -> list:
@@ -198,7 +258,7 @@ def get_players(team_url: str) -> list:
         # Get the columns
         cols = row.find_all("td")
         url = find_urls(str(cols[2])).pop()
-        match = re.search(r"<a.*title=\"(.*)\"", str(cols[2]))
+        match = re.search(r"<a.*?title=\"(.*?)\"", str(cols[2]))
         name = match.group(1)
 
         players.append({"name": name, "url": url})
@@ -228,6 +288,8 @@ def get_player_stats(player_url: str, team: str) -> dict:
     html = get_html(player_url)
     soup = BeautifulSoup(html, "html.parser")
     regular = soup.find(id="Regular_season")
+    if not regular:
+        regular = soup.find(id="NBA")
     table = regular.find_next("table", {"class": "wikitable"})
 
     rows = table.find_all("tr")
@@ -268,7 +330,14 @@ def get_player_stats(player_url: str, team: str) -> dict:
                 "points": ppg,
             }
 
-    raise ValueError("Player did not play for team in 2021-22")
+    # if player did not play, return 0
+    return {
+        "rebounds": 0,
+        "assists": 0,
+        "steals": 0,
+        "blocks": 0,
+        "points": 0,
+    }
 
 
 # run the whole thing if called as a script, for quick testing
