@@ -17,16 +17,41 @@ def find_urls(
     """
     # create and compile regular expression(s)
 
-    urls = ...
+    url_pat = r"<a .*href=[\"']([^#'\"]+)[#\"'].*<\/a>"
+
+    # url_pat = re.compile(pattern)
+
+    urls = re.findall(url_pat, html)
+    # additional processing to change path urls to full urls
+
+    # urls_string = " ".join(urls)
+    # print(urls_string)
+
     # 1. find all the anchor tags, then
     # 2. find the urls href attributes
+
+    # add base_url to relative paths and https to those with same protocol
+    for i in range(len(urls)):
+        if len(urls[i]) < 2:
+            continue
+
+        if urls[i][0] == "/":
+            if urls[i][1] != "/":
+                urls[i] = base_url + urls[i]
+            else:
+                urls[i] = "https:" + urls[i]
+
+    urls = set(urls)
 
     # Write to file if requested
     if output:
         print(f"Writing to: {output}")
-        ...
+        with open(output, "w") as file:
+            # join the urls with space as separator. then replace space with newline,
+            # and write this to output
+            file.write(re.sub(r"\s", "\n", " ".join(urls)))
 
-    ...
+    return urls
 
 
 def find_articles(html: str, output=None) -> set:
@@ -36,14 +61,20 @@ def find_articles(html: str, output=None) -> set:
     returns:
         - (set) : a set with urls to all the articles found
     """
-    urls = ...
-    pattern = ...
-    articles = ...
+    urls = find_urls(html)
+    pattern = r"(https:\/\/[a-z]{2}\.wikipedia\.org\/wiki\/[^:\s]+)"
+    articles = re.findall(pattern, " ".join(urls))
 
+    articles = set(articles)
     # Write to file if wanted
     if output:
-        ...
-    ...
+        print(f"Writing to: {output}")
+        with open(output, "w") as file:
+            # join the urls with space as separator. then replace space with newline,
+            # and write this to output
+            file.write(re.sub(r"\s", "\n", " ".join(articles)))
+
+    return articles
 
 
 ## Regex example

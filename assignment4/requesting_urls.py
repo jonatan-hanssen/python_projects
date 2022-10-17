@@ -35,3 +35,6 @@ def get_html(url: str, params: Optional[Dict] = None, output: Optional[str] = No
             file.write(f"HTTP GET request at {response.url}:\n{response.text}")
 
     return html_str
+
+
+get_html("https://nrk.no", output="snake")

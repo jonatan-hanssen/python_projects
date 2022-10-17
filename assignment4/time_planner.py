@@ -30,12 +30,12 @@ def time_plan(url: str) -> str:
         markdown (str) : string containing the markdown schedule
     """
     # Get the page
-    html = ...
+    html = get_html(url)
     # parse the HTML
-    soup = ...
+    soup = BeautifulSoup(html, "html.parser")
     # locate the table
-    calendar = ...
-    soup_table = ...
+    calendar = soup.find(id="Calendar")
+    soup_table = calendar.find_next("table", {"class": "wikitable"})
     # extract events into pandas data frame
     df = extract_events(soup_table)
 
@@ -68,16 +68,25 @@ def extract_events(table: bs4.element.Tag) -> pd.DataFrame:
     data = []
 
     # Extracts the data in table, keeping track of colspan and rowspan
-    rows = ...
+    rows = table.find_all("tr")
     rows = rows[1:]
     for tr in rows:
-        cells = ...
+        cells = tr.find_all("td")
         row = []
+        # skip rows which are just a subtitle (f.ex "FIS ALpine World
+        # Ski Championship or World Cup Season Final")
+        if len(cells) == 1:
+            continue
         for cell in cells:
-            colspan = ...
-            rowspan = ...
-            ...
-            text = ...
+            # print(cell.string)
+            rowspan = 1
+            colspan = 1
+            if "rowspan" in cell.attrs:
+                rowspan = int(cell["rowspan"])
+
+            if "colspan" in cell.attrs:
+                colspan = int(cell["colspan"])
+            text = strip_text(cell.text)
             row.append(
                 TableEntry(
                     text=text,
@@ -92,11 +101,11 @@ def extract_events(table: bs4.element.Tag) -> pd.DataFrame:
     all_data = expand_row_col_span(data)
 
     # List of desired columns
-    wanted = ...
+    wanted = ["Date", "Venue", "Type"]
 
     # Filter data and create pandas dataframe
     filtered_data = filter_data(labels, all_data, wanted)
-    df = ...
+    df = pd.DataFrame(data=filtered_data)
 
     return df
 
@@ -117,7 +126,25 @@ def render_schedule(data: pd.DataFrame) -> str:
         """
         return event_types.get(type_key[:2], type_key)
 
-    ...
+    data["Type"] = data["Type"].apply(lambda x: expand_event_type(x))
+
+    md = ""
+
+    columns = data.columns
+    for column in columns:
+        md += column + " | "
+
+    md += "\n"
+    for column in columns:
+        md += " --- | "
+    md += "\n"
+
+    for i in range(len(data[columns[0]])):
+        for column in columns:
+            md += data[column][i] + " | "
+        md += "\n"
+
+    return md
 
 
 def strip_text(text: str) -> str:
@@ -134,6 +161,10 @@ def strip_text(text: str) -> str:
 
     text = text[:20]  # 20 char limit
     text = re.sub(r"\[.*\]", "", text)
+    # remove trailing and leading whitespace
+    text = re.sub(r"^\s+|\s+$", "", text)
+    # remove linebreaks
+    text = re.sub(r"\n", "", text)
     return text
 
 
@@ -152,7 +183,19 @@ def filter_data(keys: list, data: list, wanted: list):
             This is the subset of data in `data`,
             after discarding the columns not in `wanted`.
     """
-    ...
+    indeces = list()
+    for i in range(len(keys)):
+        if keys[i] in wanted:
+            indeces.append(i)
+
+    filtered_data = dict()
+    for i in range(len(indeces)):
+        column = list()
+        for j in range(len(data)):
+            column.append(data[j][indeces[i]])
+        filtered_data[keys[indeces[i]]] = column
+
+    return filtered_data
 
 
 def expand_row_col_span(data):
