@@ -98,6 +98,10 @@ def plot_best(best: Dict[str, List[Dict]], stat: str = "points") -> None:
             Should be a key in the player info dictionary.
     """
     stats_dir = "NBA_player_statistics"
+
+    if not os.path.exists(stats_dir):
+        os.mkdir(stats_dir)
+
     for team_name in best:
         best[team_name].sort(key=lambda x: x[stat])
 
@@ -159,6 +163,8 @@ def plot_best(best: Dict[str, List[Dict]], stat: str = "points") -> None:
     ax.set_title(f"{stat} per game for 2021-22 NBA regular season")
     ax.set_ylim(0, max_val * 1.5)
     ax.legend()
+
+    plt.savefig(f"{stats_dir}/{stat}.png")
     plt.show()
 
 
@@ -258,7 +264,7 @@ def get_players(team_url: str) -> list:
         # Get the columns
         cols = row.find_all("td")
         url = find_urls(str(cols[2])).pop()
-        match = re.search(r"<a.*?title=\"(.*?)\"", str(cols[2]))
+        match = re.search(r"<a.*?>(.*)?<\/a>", str(cols[2]))
         name = match.group(1)
 
         players.append({"name": name, "url": url})
