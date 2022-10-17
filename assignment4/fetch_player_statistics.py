@@ -8,6 +8,7 @@ import numpy as np
 from bs4 import BeautifulSoup
 from matplotlib import pyplot as plt
 from requesting_urls import get_html
+from filter_urls import find_urls
 
 ## --- Task 8, 9 and 10 --- ##
 
@@ -183,23 +184,26 @@ def get_players(team_url: str) -> list:
     print(f"Finding players in {team_url}")
 
     # Get the table
-    html = ...
-    soup = ...
-    table = ...
+    html = get_html(team_url)
+    soup = BeautifulSoup(html, "html.parser")
+    roster = soup.find(id="Roster")
+    table = roster.find_next("table", {"class": "toccolours"})
 
     players = []
     # Loop over every row and get the names from roster
-    rows = ...
+    rows = table.find_all("tr")
+    # players only show up after row 4
+    rows = rows[3:]
     for row in rows:
         # Get the columns
-        cols = ...
-        # find name links (a tags)
-        # and add to players a dict with
-        # {'name':, 'url':}
-        ...
+        cols = row.find_all("td")
+        url = find_urls(str(cols[2])).pop()
+        match = re.search(r"<a.*title=\"(.*)\"", str(cols[2]))
+        name = match.group(1)
+
+        players.append({"name": name, "url": url})
 
     # return list of players
-
     return players
 
 
@@ -211,30 +215,60 @@ def get_player_stats(player_url: str, team: str) -> dict:
     returns:
         stats (dict) : dictionary with the keys (at least): points, assists, and rebounds keys
     """
+    # gets a float from a cell in the table
+    def get_floats(cols: list, index: int) -> float:
+        if cols[index].string:
+            return float(cols[index].string.strip().replace("*", ""))
+        else:
+            return float(cols[index].b.string)
+
     print(f"Fetching stats for player in {player_url}")
 
     # Get the table with stats
-    html = ...
-    soup = ...
-    table = ...
+    html = get_html(player_url)
+    soup = BeautifulSoup(html, "html.parser")
+    regular = soup.find(id="Regular_season")
+    table = regular.find_next("table", {"class": "wikitable"})
 
-    ...
-    stats = ...
+    rows = table.find_all("tr")
+    rows = rows[1:]
 
-    rows = ...
+    stats = None
 
     # Loop over rows and extract the stats
+
     for row in rows:
-        cols = ...
-        ...
-        # Check correct team (some players change team within season)
-        ...
+        cols = row.find_all("td")
 
-        # load stats from columns
-        # keys should be 'points', 'assists', etc.
-        ...
+        href_body_pattern = r"<a.*>(.*)<\/a>"
 
-    return stats
+        date = ""
+        match = re.search(r"title=\"(\d{4}).(\d{2})", str(cols[0]))
+        if match:
+            date = f"{match.group(1)} {match.group(2)}"
+
+        colteam = ""
+        match = re.search(href_body_pattern, str(cols[1]))
+        if match:
+            colteam = match.group(1)
+
+        # if colteam == team and date == "2021 22":
+        if colteam == team and date == "2021 22":
+            rpg = get_floats(cols, 8)
+            apg = get_floats(cols, 9)
+            spg = get_floats(cols, 10)
+            bpg = get_floats(cols, 11)
+            ppg = get_floats(cols, 12)
+
+            return {
+                "rebounds": rpg,
+                "assists": apg,
+                "steals": spg,
+                "blocks": bpg,
+                "points": ppg,
+            }
+
+    raise ValueError("Player did not play for team in 2021-22")
 
 
 # run the whole thing if called as a script, for quick testing
