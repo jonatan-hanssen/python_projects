@@ -32,11 +32,27 @@ def get_date_patterns() -> Tuple[str, str, str]:
 
     # Regex to capture days, months and years with numbers
     # year should accept a 4-digit number between at least 1000-2029
-    year = r"(?P<year>...)"
+    year = r"\b[12]\d{3}\b"
     # month should accept month names or month numbers
-    month = r"(?P<month>...)"
+    jan = r"\b[jJ]an(?:uary)?\b"
+    feb = r"\b[fF]eb(?:ruary)?\b"
+    mar = r"\b[mM]ar(?:ch)?\b"
+    apr = r"\b[aA]pr(?:il)?\b"
+    may = r"\b[mM]ay\b"
+    jun = r"\b[jJ]une?\b"
+    jul = r"\b[jJ]uly?\b"
+    aug = r"\b[aA]aug(?:ust)?\b"
+    sep = r"\b[sS]ep(?:tember)?\b"
+    okt = r"\b[oO]ct(?:ober)?\b"
+    nov = r"\b[nN]ov(?:ember)?\b"
+    dec = r"\b[dD]ec(?:ember)?\b"
+
+    decimal_month = r"\b[01]?[0-9]\b"
+
+    month = rf"(?:{jan}|{feb}|{mar}|{apr}|{may}|{jun}|{jul}|{aug}|{sep}|{okt}|{nov}|{dec}|{decimal_month})"
+    month = rf"{jan}"
     # day should be a number, which may or may not be zero-padded
-    day = r"(?P<day>...)"
+    day = r"(?[0-3]?[0-9])"
 
     return year, month, day
 
@@ -54,7 +70,7 @@ def convert_month(s: str) -> str:
     """
     # If already digit do nothing
     if s.isdigit():
-        ...
+        return s
 
     # Convert to number as string
     ...
@@ -68,7 +84,7 @@ def zero_pad(n: str):
     You don't need to use this function,
     but you may find it useful.
     """
-    ...
+    return f"0{n}"
 
 
 def find_dates(text: str, output: str = None) -> list:
