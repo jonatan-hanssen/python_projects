@@ -22,15 +22,15 @@ The scripts have been successfully run in the following environments (both with 
 
 #### Personal laptop
 ```
-$ uname -r
-6.0.1-arch2-1
+$ uname -rs
+Linux 6.0.1-arch2-1
 $ python3 --version
 Python 3.10.8
 ```
 #### Ifi workstation
 ```
-$ uname -r
-4.18.0-372.13.1.el8_6.x86_64
+$ uname -rs
+Linux 4.18.0-372.13.1.el8_6.x86_64
 $ python3 --version
 Python 3.9.12
 ```
