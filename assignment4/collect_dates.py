@@ -56,9 +56,9 @@ def get_date_patterns() -> Tuple[str, str, str]:
     return year, month, day
 
 
-def convert_month(s: str) -> str:
-    """Converts a string date to the same date but with month replaced by a number
-    (e.g. 'September' -> '09'.
+def convert_date(s: str) -> str:
+    """Converts a date without zero padding and with typed months into a date with
+    padding and numeric months. (e.g. 'January 5, 2020' -> '01 05, 2020'
 
     You don't need to use this function,
     but you may find it useful.
@@ -68,46 +68,58 @@ def convert_month(s: str) -> str:
     returns:
         month_number (str) : month number as zero-padded string
     """
-    jan = r"\b[jJ]an(?:uary)?\b"
-    feb = r"\b[fF]eb(?:ruary)?\b"
-    mar = r"\b[mM]ar(?:ch)?\b"
-    apr = r"\b[aA]pr(?:il)?\b"
-    may = r"\b[mM]ay\b"
-    jun = r"\b[jJ]une?\b"
-    jul = r"\b[jJ]uly?\b"
-    aug = r"\b[aA]aug(?:ust)?\b"
-    sep = r"\b[sS]ep(?:tember)?\b"
-    okt = r"\b[oO]ct(?:ober)?\b"
-    nov = r"\b[nN]ov(?:ember)?\b"
-    dec = r"\b[dD]ec(?:ember)?\b"
 
-    # there are definitely more effective ways of doing this
-    s = re.sub(rf"{jan}", "01", s)
-    s = re.sub(rf"{feb}", "02", s)
-    s = re.sub(rf"{mar}", "03", s)
-    s = re.sub(rf"{apr}", "04", s)
-    s = re.sub(rf"{may}", "05", s)
-    s = re.sub(rf"{jun}", "06", s)
-    s = re.sub(rf"{jul}", "07", s)
-    s = re.sub(rf"{aug}", "08", s)
-    s = re.sub(rf"{sep}", "09", s)
-    s = re.sub(rf"{okt}", "10", s)
-    s = re.sub(rf"{nov}", "11", s)
-    s = re.sub(rf"{dec}", "12", s)
+    month_list = [
+        r"\b[jJ]an(?:uary)?\b",
+        r"\b[fF]eb(?:ruary)?\b",
+        r"\b[mM]ar(?:ch)?\b",
+        r"\b[aA]pr(?:il)?\b",
+        r"\b[mM]ay\b",
+        r"\b[jJ]une?\b",
+        r"\b[jJ]uly?\b",
+        r"\b[aA]aug(?:ust)?\b",
+        r"\b[sS]ep(?:tember)?\b",
+        r"\b[oO]ct(?:ober)?\b",
+        r"\b[nN]ov(?:ember)?\b",
+        r"\b[dD]ec(?:ember)?\b",
+    ]
 
-    # Convert to number as string
+    # there are probably more effective ways than looping over
+    # every possible pattern
+    for i in range(len(month_list)):
+        s = re.sub(month_list[i], str(i + 1), s)
+
+    # zero pad any singular digits. this fixes both the months
+    # created above and any non-zero-padded days in the date also
+    s = re.sub(r"\b([0-9])\b", r"0\1", s)
+
     return s
 
 
-def convert_day(s: str) -> str:
-    """Converts a string date to the same date but with zero padded days
-
+def convert_month(s: str) -> str:
+    """Converts a string month to number (e.g. 'September' -> '09'.
+    You don't need to use this function,
+    but you may find it useful.
     arguments:
-        s (string): A date
+        month_name (str) : month name
     returns:
-        s (string): The same date but with zero padded days
+        month_number (str) : month number as zero-padded string
     """
-    return re.sub(r"\b([0-9])\b", r"0\1", s)
+    # If already digit do nothing
+    if s.isdigit():
+        ...
+
+    # Convert to number as string
+    ...
+
+
+def zero_pad(n: str):
+    """zero-pad a number string
+    turns '2' into '02'
+    You don't need to use this function,
+    but you may find it useful.
+    """
+    ...
 
 
 def find_dates(text: str, output: str = None) -> list:
@@ -133,17 +145,9 @@ def find_dates(text: str, output: str = None) -> list:
     YMD = rf"{year}\W+{month}\W+{day}"
 
     # list with all supported formats
-    # formats = [("iso", ISO, ("dmy", DMY), ("mdy", MDY), ("ymd", YMD)]
-
-    # find all dates in any format in text
-    date_dict = dict()
-    date_dict["iso"] = list()
-    date_dict["dmy"] = list()
-    date_dict["mdy"] = list()
-    date_dict["ymd"] = list()
-
     format_dict = {"iso": ISO, "dmy": DMY, "mdy": MDY, "ymd": YMD}
 
+    # find all dates in any format in text
     dates = list()
 
     for key in format_dict:
@@ -155,8 +159,7 @@ def find_dates(text: str, output: str = None) -> list:
             matches_list.append((match_obj.span()[0], match_obj.group(0)))
 
         for i in range(len(matches_list)):
-            matches_list[i] = (matches_list[i][0], convert_month(matches_list[i][1]))
-            matches_list[i] = (matches_list[i][0], convert_day(matches_list[i][1]))
+            matches_list[i] = (matches_list[i][0], convert_date(matches_list[i][1]))
 
             if key == "iso":
                 matches_list[i] = (
@@ -196,11 +199,14 @@ def find_dates(text: str, output: str = None) -> list:
     # we now need to remove duplicates in case something matches
     # for both iso and ymd. Casting to a set does this. This does not remove
     # the same date if it appears twice, only if we had two matches at the exact same
-    # place
+    # place. We cast right back to a list afterwards
     dates = list(set(dates))
 
+    # the default implementation is to sort based on the first element in a tuple,
+    # so we are good
     dates.sort()
 
+    # but we only care about the second element
     dates = [dates[i][1] for i in range(len(dates))]
 
     # Write to file if wanted
