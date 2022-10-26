@@ -2,6 +2,10 @@ from typing import List  # isort:skip
 from requesting_urls import get_html
 from filter_urls import find_articles
 import re
+import sys
+import argparse
+
+global debug
 
 
 def find_path(start: str, finish: str) -> List[str]:
@@ -37,6 +41,10 @@ def find_path(start: str, finish: str) -> List[str]:
             else:
                 self.layer = parent.layer + 1
 
+    match = re.match(r"https:\/\/[a-z]{2}\.wikipedia\.org", start)
+    # here we just assume that there are no links to wikipedia in other languages
+    base_url = match.group()
+
     queue = [Node(start, None)]
 
     while queue:
@@ -44,14 +52,20 @@ def find_path(start: str, finish: str) -> List[str]:
         only_article_pattern = r"\/wiki\/(.*)"
         match = re.search(only_article_pattern, node.url)
         only_article = match.group(1)
+        only_article = node.url
         print(
             f"Articles found: {len(queue)} | Layer: {node.layer} | Article: {only_article}"
         )
         if node.url == finish:
             break
         html = get_html(node.url)
-        articles = find_articles(html)
+        articles = find_articles(html, base_url)
         node_list = [Node(url, node) for url in articles]
+
+        global debug
+        if debug:
+            node_list.sort(key=lambda x: x.url)
+
         queue.extend(node_list)
         if len(queue) == 0:
             print("No path found")
@@ -74,8 +88,31 @@ def find_path(start: str, finish: str) -> List[str]:
 
 
 if __name__ == "__main__":
-    start = "https://en.wikipedia.org/wiki/Python_(programming_language)"
-    finish = "https://en.wikipedia.org/wiki/Peace"
+
+    argv = sys.argv[1:]
+
+    parser = argparse.ArgumentParser(description="Find shortest path")
+
+    group = parser.add_mutually_exclusive_group()
+
+    parser.add_argument(
+        "-d",
+        "--debug",
+        help="Sort the articles, for debugging and proof that it actually does work (I have chosen a finish url which comes early",
+        action="store_true",
+    )
+
+    args = parser.parse_args()
+
+    global debug
+    debug = args.debug
+
+    if debug:
+        start = "https://no.wikipedia.org/wiki/Lactobacillus"
+        finish = "https://no.wikipedia.org/wiki/1801"
+    else:
+        start = "https://en.wikipedia.org/wiki/Python_(programming_language)"
+        finish = "https://en.wikipedia.org/wiki/Peace"
 
     path = find_path(start, finish)
     print(path)

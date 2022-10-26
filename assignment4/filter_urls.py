@@ -54,14 +54,21 @@ def find_urls(
     return urls
 
 
-def find_articles(html: str, output=None) -> set:
+# here i have added the optional parameter base_url, it doesnt make any sense
+# for this to not take in base_url. It is needlessly complicated to try
+# to get the base url from just the html when we can easily just pass it
+# in to the find_urls function
+def find_articles(
+    html: str, base_url: str = "https://en.wikipedia.org", output=None
+) -> set:
+
     """Finds all the wiki articles inside a html text. Make call to find urls, and filter
     arguments:
         - text (str) : the html text to parse
     returns:
         - (set) : a set with urls to all the articles found
     """
-    urls = find_urls(html)
+    urls = find_urls(html, base_url=base_url)
     pattern = r"(https:\/\/[a-z]{2}\.wikipedia\.org\/wiki\/[^:\s]+)"
     articles = re.findall(pattern, " ".join(urls))
 
