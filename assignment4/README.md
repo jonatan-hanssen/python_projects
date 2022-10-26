@@ -7,7 +7,7 @@ wikipedia.
 
 Requires the python packages ```requests```, ```beautifulsoup4```, ```matplotlib``` and ```pandas```.
 
-To test the code, it is recommended to use a virtual environment. The following shell commands will install only the required packages and runs pytest, and should return 10 failed tests and 27 succeeded tests, corresponding to all obligatory parts of the assignment.
+To test the code, I recommend using a virtual environment. The following shell commands will install only the required packages and runs pytest, and should clear all 37 tests.
 
 ```
 $ python3 -m venv env
