@@ -5,10 +5,8 @@ import re
 import sys
 import argparse
 
-global debug
 
-
-def find_path(start: str, finish: str) -> List[str]:
+def find_path(start: str, finish: str, no_print=False) -> List[str]:
     """Find the shortest path from `start` to `finish`
 
     Arguments:
@@ -45,31 +43,53 @@ def find_path(start: str, finish: str) -> List[str]:
     # here we just assume that there are no links to wikipedia in other languages
     base_url = match.group()
 
-    queue = [Node(start, None)]
+    # we cannot use a list because we do not want duplicates and do not want to check
+    # for them as that is costly. We cannot use sets as two nodes with the same
+    # url are still different objects. So we use dictionaries and urls as keys.
+    # This means we are overwriting if we find the same url twice, but it does not
+    # matter as overwriting will only happen on the same layer, which is irrelevant
+    # for finding the shortest path
+    cur_layer = {start: Node(start, None)}
+    next_layer = {}
 
-    while queue:
-        node = queue.pop(0)
+    # used for printing on the same line
+    print_string = ""
+
+    # bfs loop
+    while True:
+        # pop an element from the current layer
+        node = cur_layer.popitem()[1]
+        # grab only the article
         only_article_pattern = r"\/wiki\/(.*)"
         match = re.search(only_article_pattern, node.url)
-        only_article = match.group(1)
-        only_article = node.url
-        print(
-            f"Articles found: {len(queue)} | Layer: {node.layer} | Article: {only_article}"
-        )
-        if node.url == finish:
-            break
+        # truncate at 30 chars for prettier prints
+        only_article = match.group(1)[:30]
+
+        if not no_print:
+            print(" " * len(print_string), end="\r")
+            print_string = f"  Nodes in layer {node.layer}: {len(cur_layer)}. Nodes in layer {node.layer + 1}: {len(next_layer)} | Article: {only_article}"
+            print(
+                print_string,
+                end="\r",
+            )
+
         html = get_html(node.url)
         articles = find_articles(html, base_url)
-        node_list = [Node(url, node) for url in articles]
 
-        global debug
-        if debug:
-            node_list.sort(key=lambda x: x.url)
+        if finish in articles:
+            parent = node
+            node = Node(finish, parent)
+            break
 
-        queue.extend(node_list)
-        if len(queue) == 0:
-            print("No path found")
-            exit()
+        for url in articles:
+            next_layer[url] = Node(url, node)
+
+        if len(cur_layer) == 0:
+            if len(next_layer) == 0:
+                print("Ran out of urls, no path found.")
+                exit()
+            cur_layer = next_layer
+            next_layer = {}
 
     path = list()
 
@@ -98,21 +118,24 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d",
         "--debug",
-        help="Sort the articles, for debugging and proof that it actually does work (I have chosen a finish url which comes early",
+        help="Run with shorter path",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-np",
+        "--noprint",
+        help="Do not print, for performance benefits",
         action="store_true",
     )
 
     args = parser.parse_args()
 
-    global debug
-    debug = args.debug
-
-    if debug:
+    if args.debug:
         start = "https://no.wikipedia.org/wiki/Lactobacillus"
         finish = "https://no.wikipedia.org/wiki/1801"
     else:
         start = "https://en.wikipedia.org/wiki/Python_(programming_language)"
         finish = "https://en.wikipedia.org/wiki/Peace"
 
-    path = find_path(start, finish)
+    path = find_path(start, finish, no_print=args.noprint)
     print(path)
