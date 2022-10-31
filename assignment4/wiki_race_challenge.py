@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
     if args.debug:
         start = "https://no.wikipedia.org/wiki/Lactobacillus"
-        finish = "https://no.wikipedia.org/wiki/1801"
+        finish = "https://no.wikipedia.org/wiki/Melkesyre"
     else:
         start = "https://en.wikipedia.org/wiki/Python_(programming_language)"
         finish = "https://en.wikipedia.org/wiki/Peace"
